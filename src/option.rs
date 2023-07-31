@@ -6,6 +6,7 @@ pub trait OptionExt {
         self,
         predicate: impl FnOnce(Self::Unwrapped) -> Result<bool, TError>,
     ) -> Result<bool, TError>;
+    #[allow(clippy::wrong_self_convention)]
     fn is_none_or_matches(self, predicate: impl FnOnce(Self::Unwrapped) -> bool) -> bool;
 }
 

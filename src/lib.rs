@@ -1,6 +1,7 @@
 mod bool;
 mod cow;
 mod everything;
+mod macros;
 mod option;
 mod vec;
 

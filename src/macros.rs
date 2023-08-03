@@ -24,3 +24,11 @@ macro_rules! regex {
         RE.get_or_init(|| regex::Regex::new($re).unwrap())
     }};
 }
+
+#[macro_export]
+macro_rules! fancy_regex {
+    ($re:literal $(,)?) => {{
+        static RE: std::sync::OnceLock<fancy_regex::Regex> = std::sync::OnceLock::new();
+        RE.get_or_init(|| fancy_regex::Regex::new($re).unwrap())
+    }};
+}

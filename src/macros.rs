@@ -32,3 +32,13 @@ macro_rules! fancy_regex {
         RE.get_or_init(|| fancy_regex::Regex::new($re).unwrap())
     }};
 }
+
+#[macro_export]
+macro_rules! return_if_none {
+    ($expr:expr $(,)?) => {
+        match $expr {
+            None => return,
+            Some(value) => value,
+        }
+    };
+}

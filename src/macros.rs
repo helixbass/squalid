@@ -42,3 +42,13 @@ macro_rules! return_if_none {
         }
     };
 }
+
+#[macro_export]
+macro_rules! continue_if_none {
+    ($expr:expr $(,)?) => {
+        match $expr {
+            None => continue,
+            Some(value) => value,
+        }
+    };
+}

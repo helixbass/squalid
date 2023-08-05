@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 pub trait OptionExt {
     type Unwrapped;
 
@@ -251,5 +253,25 @@ where
 
     fn is_non_empty(&self) -> bool {
         self.as_ref().filter(|value| !value._is_empty()).is_some()
+    }
+}
+
+pub trait OptionExtDeref {
+    type Target: ?Sized;
+    fn as_double_deref(&self) -> Option<&Self::Target>;
+}
+
+impl<T> OptionExtDeref for Option<T>
+where
+    T: Deref,
+    T::Target: Deref,
+{
+    type Target = <<T as Deref>::Target as Deref>::Target;
+
+    fn as_double_deref(&self) -> Option<&Self::Target> {
+        match self.as_ref() {
+            Some(t) => Some(t.deref().deref()),
+            None => None,
+        }
     }
 }

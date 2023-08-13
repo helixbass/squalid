@@ -1,8 +1,11 @@
+use std::cmp::Ordering;
+
 pub trait VecExt {
     type Item;
 
     fn and_push(self, item: Self::Item) -> Self;
     fn and_extend(self, iter: impl IntoIterator<Item = Self::Item>) -> Self;
+    fn and_sort_by(self, compare: impl FnMut(&Self::Item, &Self::Item) -> Ordering) -> Self;
 }
 
 impl<TItem> VecExt for Vec<TItem> {
@@ -15,6 +18,11 @@ impl<TItem> VecExt for Vec<TItem> {
 
     fn and_extend(mut self, iter: impl IntoIterator<Item = TItem>) -> Self {
         self.extend(iter);
+        self
+    }
+
+    fn and_sort_by(mut self, compare: impl FnMut(&Self::Item, &Self::Item) -> Ordering) -> Self {
+        self.sort_by(compare);
         self
     }
 }

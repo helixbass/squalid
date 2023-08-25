@@ -21,3 +21,12 @@ where
         self.contains(item)
     }
 }
+
+impl<T, const T_LEN: usize> Contains<T> for [T; T_LEN]
+where
+    T: PartialEq,
+{
+    fn contains_(&self, item: &T) -> bool {
+        self.contains(item)
+    }
+}

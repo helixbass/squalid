@@ -1,28 +1,22 @@
 use std::{collections::HashSet, hash};
 
-pub trait Contains {
-    type Item;
-
-    fn contains_(&self, item: &Self::Item) -> bool;
+pub trait Contains<TItem> {
+    fn contains_(&self, item: &TItem) -> bool;
 }
 
-impl<T> Contains for [T]
+impl<T> Contains<T> for [T]
 where
     T: PartialEq,
 {
-    type Item = T;
-
     fn contains_(&self, item: &T) -> bool {
         self.contains(item)
     }
 }
 
-impl<T> Contains for HashSet<T>
+impl<T> Contains<T> for HashSet<T>
 where
     T: PartialEq + Eq + hash::Hash,
 {
-    type Item = T;
-
     fn contains_(&self, item: &T) -> bool {
         self.contains(item)
     }

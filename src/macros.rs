@@ -62,3 +62,17 @@ macro_rules! break_if_none {
         }
     };
 }
+
+#[macro_export]
+macro_rules! run_once {
+    ($($stmt:stmt)*) => {{
+        static ONCE_LOCK: std::sync::OnceLock<()> = std::sync::OnceLock::new();
+        #[allow(clippy::unused_unit, redundant_semicolons)]
+        ONCE_LOCK.get_or_init(|| {
+            {
+                $($stmt)*
+                ()
+            }
+        });
+    }}
+}

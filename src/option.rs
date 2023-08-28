@@ -1,4 +1,6 @@
-use std::ops::Deref;
+use std::{ops::Deref, iter};
+
+use itertools::Either;
 
 pub trait OptionExt {
     type Unwrapped;
@@ -273,5 +275,26 @@ where
             Some(t) => Some(t.deref().deref()),
             None => None,
         }
+    }
+}
+
+pub trait OptionExtIterator {
+    type TIterator: Iterator;
+
+    fn unwrap_or_empty(
+        self,
+    ) -> Either<Self::TIterator, iter::Empty<<Self::TIterator as Iterator>::Item>>;
+}
+
+impl<TIterator: Iterator> OptionExtIterator for Option<TIterator> {
+    type TIterator = TIterator;
+
+    fn unwrap_or_empty(
+        self,
+    ) -> Either<TIterator, iter::Empty<<Self::TIterator as Iterator>::Item>> {
+        self.map_or_else(
+            || Either::Right(iter::empty()),
+            |iterator| Either::Left(iterator),
+        )
     }
 }

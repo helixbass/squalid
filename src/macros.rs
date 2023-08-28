@@ -76,3 +76,13 @@ macro_rules! run_once {
         });
     }}
 }
+
+#[macro_export]
+macro_rules! json_object {
+    ($($json:tt)+) => {
+        match serde_json::json!($($json)*) {
+            serde_json::Value::Object(value) => value,
+            _ => panic!("Expected object"),
+        }
+    };
+}

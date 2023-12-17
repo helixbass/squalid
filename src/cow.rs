@@ -30,10 +30,7 @@ where
 {
     type Borrowed = TBorrowed;
 
-    fn map_borrowed(
-        self,
-        mapper: impl FnOnce(&TBorrowed) -> &TBorrowed,
-    ) -> Cow<'a, TBorrowed> {
+    fn map_borrowed(self, mapper: impl FnOnce(&TBorrowed) -> &TBorrowed) -> Cow<'a, TBorrowed> {
         match self {
             Cow::Borrowed(value) => Cow::Borrowed(mapper(value)),
             Cow::Owned(value) => {
@@ -58,10 +55,7 @@ where
         }
     }
 
-    fn map_cow(
-        self,
-        mapper: impl FnOnce(&TBorrowed) -> Cow<'_, TBorrowed>,
-    ) -> Cow<'a, TBorrowed> {
+    fn map_cow(self, mapper: impl FnOnce(&TBorrowed) -> Cow<'_, TBorrowed>) -> Cow<'a, TBorrowed> {
         match self {
             Cow::Borrowed(value) => mapper(value),
             Cow::Owned(value) => {
@@ -92,19 +86,33 @@ where
 }
 
 pub trait CowStrExt<'a> {
-    fn sliced(self, range: impl SliceIndex<str, Output = str>) -> Cow<'a, str>;
-    fn sliced_ref(&self, range: impl SliceIndex<str, Output = str>) -> Cow<'a, str>;
+    fn sliced<TRange: SliceIndex<str, Output = str>>(
+        &self,
+        get_range: impl FnOnce(usize) -> TRange,
+    ) -> Cow<'a, str>;
+    fn sliced_owned<TRange: SliceIndex<str, Output = str>>(
+        self,
+        get_range: impl FnOnce(usize) -> TRange,
+    ) -> Cow<'a, str>;
     fn trimmed(self) -> Cow<'a, str>;
     fn trimmed_ref(&self) -> Cow<'a, str>;
 }
 
 impl<'a> CowStrExt<'a> for Cow<'a, str> {
-    fn sliced(self, range: impl SliceIndex<str, Output = str>) -> Cow<'a, str> {
-        self.map_borrowed(|value| &value[range])
+    fn sliced<TRange: SliceIndex<str, Output = str>>(
+        &self,
+        get_range: impl FnOnce(usize) -> TRange,
+    ) -> Cow<'a, str> {
+        let range = get_range(self.len());
+        self.map_borrowed_ref(|value| &value[range])
     }
 
-    fn sliced_ref(&self, range: impl SliceIndex<str, Output = str>) -> Cow<'a, str> {
-        self.map_borrowed_ref(|value| &value[range])
+    fn sliced_owned<TRange: SliceIndex<str, Output = str>>(
+        self,
+        get_range: impl FnOnce(usize) -> TRange,
+    ) -> Cow<'a, str> {
+        let range = get_range(self.len());
+        self.map_borrowed(|value| &value[range])
     }
 
     fn trimmed(self) -> Cow<'a, str> {

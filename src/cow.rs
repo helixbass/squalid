@@ -16,11 +16,11 @@ pub trait CowExt<'a> {
     ) -> Cow<'a, Self::Borrowed>;
     fn map_cow(
         self,
-        mapper: impl FnOnce(&Self::Borrowed) -> Cow<'a, Self::Borrowed>,
+        mapper: impl FnOnce(&Self::Borrowed) -> Cow<'_, Self::Borrowed>,
     ) -> Cow<'a, Self::Borrowed>;
     fn map_cow_ref(
         &self,
-        mapper: impl FnOnce(&Self::Borrowed) -> Cow<'a, Self::Borrowed>,
+        mapper: impl FnOnce(&Self::Borrowed) -> Cow<'_, Self::Borrowed>,
     ) -> Cow<'a, Self::Borrowed>;
 }
 
@@ -60,7 +60,7 @@ where
 
     fn map_cow(
         self,
-        mapper: impl FnOnce(&TBorrowed) -> Cow<'a, TBorrowed>,
+        mapper: impl FnOnce(&TBorrowed) -> Cow<'_, TBorrowed>,
     ) -> Cow<'a, TBorrowed> {
         match self {
             Cow::Borrowed(value) => mapper(value),
@@ -82,7 +82,7 @@ where
 
     fn map_cow_ref(
         &self,
-        mapper: impl FnOnce(&TBorrowed) -> Cow<'a, TBorrowed>,
+        mapper: impl FnOnce(&TBorrowed) -> Cow<'_, TBorrowed>,
     ) -> Cow<'a, TBorrowed> {
         match self {
             Cow::Borrowed(value) => mapper(value),

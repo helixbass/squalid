@@ -42,6 +42,27 @@ impl<TItem: Ord> VecExtOrd for Vec<TItem> {
     }
 }
 
+pub trait SliceExtClone {
+    type Item: Clone;
+
+    fn sorted_by_key<TKey>(self, f: impl FnMut(&Self::Item) -> TKey) -> Vec<Self::Item>
+    where
+        TKey: Ord;
+}
+
+impl<TItem: Clone + Ord> SliceExtClone for &[TItem] {
+    type Item = TItem;
+
+    fn sorted_by_key<TKey>(self, f: impl FnMut(&Self::Item) -> TKey) -> Vec<Self::Item>
+    where
+        TKey: Ord,
+    {
+        let mut cloned = self.to_owned();
+        cloned.sort_by_key(f);
+        cloned
+    }
+}
+
 pub trait SliceExtCloneOrd {
     type Item: Clone + Ord;
 

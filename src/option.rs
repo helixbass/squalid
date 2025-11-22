@@ -1,4 +1,4 @@
-use std::{ops::Deref, iter};
+use std::{iter, ops::Deref};
 
 use itertools::Either;
 
@@ -64,6 +64,8 @@ pub trait OptionExt {
         self,
         mapper: impl FnOnce(Self::Unwrapped) -> Result<TMapped, TError>,
     ) -> Result<TMapped, TError>;
+
+    fn assert_none(&self);
 }
 
 impl<TValue> OptionExt for Option<TValue> {
@@ -191,6 +193,10 @@ impl<TValue> OptionExt for Option<TValue> {
     ) -> Result<TMapped, TError> {
         Ok(self.try_map(mapper)?.unwrap_or_default())
     }
+
+    fn assert_none(&self) {
+        assert!(self.is_none());
+    }
 }
 
 pub trait IsEmpty {
@@ -296,5 +302,25 @@ impl<TIterator: Iterator> OptionExtIterator for Option<TIterator> {
             || Either::Right(iter::empty()),
             |iterator| Either::Left(iterator),
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[should_panic]
+    fn test_assert_none_panics() {
+        Some("hello").assert_none();
+    }
+
+    #[test]
+    fn test_assert_none_continues() {
+        Option::<String>::None.assert_none();
+        assert_eq!(
+            "great way to test that a test doesn't panic",
+            "great way to test that a test doesn't panic",
+        );
     }
 }

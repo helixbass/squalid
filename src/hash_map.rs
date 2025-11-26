@@ -19,3 +19,35 @@ where
         self
     }
 }
+
+pub trait IteratorExt: Iterator {
+    type Key;
+    type Value;
+
+    fn map_values<TNewValue, TMapper>(
+        &self,
+        mapper: TMapper,
+    ) -> MapValues<Self, TMapper, Self::Key, Self::Value>
+    where
+        TMapper: FnMut(Self::Value) -> TNewValue;
+}
+
+impl<TKey, TValue, TIterator> IteratorExt for TIterator
+where
+    TIterator: Iterator<Item = (&TKey, &TValue)>,
+{
+    type Key = TKey;
+    type Value = TKey;
+
+    fn map_values<TNewValue>(
+        &self,
+        mapper: impl Fn(&Self::Value) -> TNewValue,
+    ) -> MapValues<Self::Key, Self::Value>;
+}
+
+pub struct MapValues<TInner, TKey, TValue>
+where
+    TInner: Iterator<Item = (&TKey, &TValue)>,
+{
+    inner: TInner,
+}

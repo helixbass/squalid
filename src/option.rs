@@ -66,6 +66,14 @@ pub trait OptionExt {
     ) -> Result<TMapped, TError>;
 
     fn assert_none(&self);
+
+    fn is<TOther>(&self, other: TOther) -> bool
+    where
+        Self::Unwrapped: PartialEq<TOther>;
+
+    fn if_is<TOther>(self, other: TOther) -> Self
+    where
+        Self::Unwrapped: PartialEq<TOther>;
 }
 
 impl<TValue> OptionExt for Option<TValue> {
@@ -197,6 +205,23 @@ impl<TValue> OptionExt for Option<TValue> {
     fn assert_none(&self) {
         assert!(self.is_none());
     }
+
+    fn is<TOther>(&self, other: TOther) -> bool
+    where
+        Self::Unwrapped: PartialEq<TOther>,
+    {
+        match self {
+            None => false,
+            Some(value) => value == &other,
+        }
+    }
+
+    fn if_is<TOther>(self, other: TOther) -> Self
+    where
+        Self::Unwrapped: PartialEq<TOther>,
+    {
+        self.filter(|value| value == &other)
+    }
 }
 
 pub trait IsEmpty {
@@ -322,5 +347,29 @@ mod tests {
             "great way to test that a test doesn't panic",
             "great way to test that a test doesn't panic",
         );
+    }
+
+    #[test]
+    fn test_is() {
+        #[derive(Copy, Clone, Debug, PartialEq, Eq)]
+        enum Foo {
+            Bar,
+            Baz,
+        }
+
+        assert!(Some(Foo::Bar).is(Foo::Bar));
+        assert!(!Some(Foo::Baz).is(Foo::Bar));
+    }
+
+    #[test]
+    fn test_if_is() {
+        #[derive(Copy, Clone, Debug, PartialEq, Eq)]
+        enum Foo {
+            Bar,
+            Baz,
+        }
+
+        assert!(matches!(Some(Foo::Bar).if_is(Foo::Bar), Some(Foo::Bar)));
+        assert!(matches!(Some(Foo::Baz).if_is(Foo::Bar), None));
     }
 }

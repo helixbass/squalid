@@ -74,6 +74,8 @@ pub trait OptionExt {
     fn if_is<TOther>(self, other: TOther) -> Self
     where
         Self::Unwrapped: PartialEq<TOther>;
+
+    fn push_if(self, vec: &mut Vec<Self::Unwrapped>);
 }
 
 impl<TValue> OptionExt for Option<TValue> {
@@ -221,6 +223,15 @@ impl<TValue> OptionExt for Option<TValue> {
         Self::Unwrapped: PartialEq<TOther>,
     {
         self.filter(|value| value == &other)
+    }
+
+    fn push_if(self, vec: &mut Vec<Self::Unwrapped>) {
+        match self {
+            Some(value) => {
+                vec.push(value);
+            }
+            None => {}
+        }
     }
 }
 
@@ -371,5 +382,14 @@ mod tests {
 
         assert!(matches!(Some(Foo::Bar).if_is(Foo::Bar), Some(Foo::Bar)));
         assert!(matches!(Some(Foo::Baz).if_is(Foo::Bar), None));
+    }
+
+    #[test]
+    fn test_push_if() {
+        let mut vec: Vec<String> = Default::default();
+        Some("foo".to_owned()).push_if(&mut vec);
+        assert_eq!(vec, vec!["foo".to_owned()]);
+        None.push_if(&mut vec);
+        assert_eq!(vec, vec!["foo".to_owned()]);
     }
 }

@@ -6,6 +6,7 @@ pub trait VecExt {
     fn and_push(self, item: Self::Item) -> Self;
     fn and_extend(self, iter: impl IntoIterator<Item = Self::Item>) -> Self;
     fn and_sort_by(self, compare: impl FnMut(&Self::Item, &Self::Item) -> Ordering) -> Self;
+    fn append_to(self, other: &mut Vec<Self::Item>);
 }
 
 impl<TItem> VecExt for Vec<TItem> {
@@ -24,6 +25,10 @@ impl<TItem> VecExt for Vec<TItem> {
     fn and_sort_by(mut self, compare: impl FnMut(&Self::Item, &Self::Item) -> Ordering) -> Self {
         self.sort_by(compare);
         self
+    }
+
+    fn append_to(mut self, other: &mut Vec<Self::Item>) {
+        other.append(&mut self);
     }
 }
 
@@ -104,5 +109,12 @@ mod tests {
         let sorted = foo.sorted();
         assert_eq!(sorted, vec![1, 2, 3]);
         assert_eq!(foo, vec![1, 3, 2]);
+    }
+
+    #[test]
+    fn test_append_to() {
+        let mut ret = vec![3, 4];
+        vec![1, 2].append_to(&mut ret);
+        assert_eq!(ret, vec![3, 4, 1, 2]);
     }
 }

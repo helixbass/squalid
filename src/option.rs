@@ -321,23 +321,40 @@ where
 }
 
 pub trait OptionExtIterator {
-    type TIterator: Iterator;
+    type Iterator: Iterator;
 
     fn unwrap_or_empty(
         self,
-    ) -> Either<Self::TIterator, iter::Empty<<Self::TIterator as Iterator>::Item>>;
+    ) -> Either<Self::Iterator, iter::Empty<<Self::Iterator as Iterator>::Item>>;
 }
 
 impl<TIterator: Iterator> OptionExtIterator for Option<TIterator> {
-    type TIterator = TIterator;
+    type Iterator = TIterator;
 
-    fn unwrap_or_empty(
-        self,
-    ) -> Either<TIterator, iter::Empty<<Self::TIterator as Iterator>::Item>> {
+    fn unwrap_or_empty(self) -> Either<TIterator, iter::Empty<<Self::Iterator as Iterator>::Item>> {
         self.map_or_else(
             || Either::Right(iter::empty()),
             |iterator| Either::Left(iterator),
         )
+    }
+}
+
+pub trait OptionExtVec {
+    type Item;
+
+    fn extend_if(self, vec: &mut Vec<Self::Item>);
+}
+
+impl<TItem> OptionExtVec for Option<Vec<TItem>> {
+    type Item = TItem;
+
+    fn extend_if(self, vec: &mut Vec<Self::Item>) {
+        match self {
+            Some(value) => {
+                vec.extend(value.into_iter());
+            }
+            None => {}
+        }
     }
 }
 
@@ -390,6 +407,17 @@ mod tests {
         Some("foo".to_owned()).push_if(&mut vec);
         assert_eq!(vec, vec!["foo".to_owned()]);
         None.push_if(&mut vec);
+        assert_eq!(vec, vec!["foo".to_owned()]);
+    }
+
+    #[test]
+    fn test_extend_if() {
+        let mut vec: Vec<String> = Default::default();
+        Some(vec!["foo".to_owned()]).extend_if(&mut vec);
+        assert_eq!(vec, vec!["foo".to_owned()]);
+        None.extend_if(&mut vec);
+        assert_eq!(vec, vec!["foo".to_owned()]);
+        Some(vec![]).extend_if(&mut vec);
         assert_eq!(vec, vec!["foo".to_owned()]);
     }
 }

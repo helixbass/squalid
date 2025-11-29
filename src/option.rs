@@ -76,6 +76,8 @@ pub trait OptionExt {
         Self::Unwrapped: PartialEq<TOther>;
 
     fn push_if(self, vec: &mut Vec<Self::Unwrapped>);
+
+    fn expect_else(self, message: impl FnOnce() -> String) -> Self::Unwrapped;
 }
 
 impl<TValue> OptionExt for Option<TValue> {
@@ -231,6 +233,13 @@ impl<TValue> OptionExt for Option<TValue> {
                 vec.push(value);
             }
             None => {}
+        }
+    }
+
+    fn expect_else(self, message: impl FnOnce() -> String) -> Self::Unwrapped {
+        match self {
+            Some(value) => value,
+            None => panic!("{}", message()),
         }
     }
 }
@@ -419,5 +428,19 @@ mod tests {
         assert_eq!(vec, vec!["foo".to_owned()]);
         Some(vec![]).extend_if(&mut vec);
         assert_eq!(vec, vec!["foo".to_owned()]);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_expect_else_panics() {
+        Option::<String>::None.expect_else(|| "Hi".to_owned());
+    }
+
+    #[test]
+    fn test_expect_else() {
+        assert_eq!(
+            Some("foo".to_owned()).expect_else(|| "Hi".to_owned()),
+            "foo".to_owned(),
+        );
     }
 }

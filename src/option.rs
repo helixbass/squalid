@@ -78,6 +78,8 @@ pub trait OptionExt {
     fn push_if(self, vec: &mut Vec<Self::Unwrapped>);
 
     fn expect_else(self, message: impl FnOnce() -> String) -> Self::Unwrapped;
+
+    fn populate(&mut self, value: Self::Unwrapped) -> &mut Self::Unwrapped;
 }
 
 impl<TValue> OptionExt for Option<TValue> {
@@ -241,6 +243,13 @@ impl<TValue> OptionExt for Option<TValue> {
             Some(value) => value,
             None => panic!("{}", message()),
         }
+    }
+
+    fn populate(&mut self, value: Self::Unwrapped) -> &mut Self::Unwrapped {
+        if self.is_some() {
+            panic!("expected None");
+        }
+        self.insert(value)
     }
 }
 
@@ -442,5 +451,18 @@ mod tests {
             Some("foo".to_owned()).expect_else(|| "Hi".to_owned()),
             "foo".to_owned(),
         );
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_populate_panics() {
+        let _ = Some("foo").populate("bar");
+    }
+
+    #[test]
+    fn test_populate() {
+        let mut option: Option<Vec<String>> = None;
+        option.populate(vec![]).push("foo".to_owned());
+        assert_eq!(option, Some(vec!["foo".to_owned()]));
     }
 }

@@ -376,6 +376,26 @@ impl<TItem> OptionExtVec for Option<Vec<TItem>> {
     }
 }
 
+pub trait OptionExtDefault {
+    type Unwrapped;
+
+    fn populate_default(&mut self) -> &mut Self::Unwrapped;
+}
+
+impl<TValue> OptionExtDefault for Option<TValue>
+where
+    TValue: Default,
+{
+    type Unwrapped = TValue;
+
+    fn populate_default(&mut self) -> &mut Self::Unwrapped {
+        if self.is_some() {
+            panic!("expected None");
+        }
+        self.insert(Default::default())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -463,6 +483,19 @@ mod tests {
     fn test_populate() {
         let mut option: Option<Vec<String>> = None;
         option.populate(vec![]).push("foo".to_owned());
+        assert_eq!(option, Some(vec!["foo".to_owned()]));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_populate_default_panics() {
+        let _ = Some("foo").populate_default();
+    }
+
+    #[test]
+    fn test_populate_default() {
+        let mut option: Option<Vec<String>> = None;
+        option.populate_default().push("foo".to_owned());
         assert_eq!(option, Some(vec!["foo".to_owned()]));
     }
 }

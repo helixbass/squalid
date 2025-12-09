@@ -15,7 +15,9 @@ pub use default::_d;
 pub use everything::EverythingExt;
 pub use hash_map::HashMapExt;
 pub use iterator::IteratorExt;
-pub use option::{IsEmpty, NonEmpty, OptionExt, OptionExtDeref, OptionExtIterator, OptionExtVec};
+pub use option::{
+    IsEmpty, NonEmpty, OptionExt, OptionExtDefault, OptionExtDeref, OptionExtIterator, OptionExtVec,
+};
 pub use vec::{SliceExtClone, SliceExtCloneOrd, VecExt, VecExtOrd};
 
 pub use crate::bool::BoolExt;

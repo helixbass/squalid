@@ -10,7 +10,7 @@ mod option;
 mod vec;
 
 pub use collections::Contains;
-pub use cow::{CowExt, CowStrExt};
+pub use cow::{CowExt, CowStrExt, IntoCow};
 pub use default::_d;
 pub use everything::EverythingExt;
 pub use hash_map::HashMapExt;

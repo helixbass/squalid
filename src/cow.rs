@@ -123,3 +123,62 @@ impl<'a> CowStrExt<'a> for Cow<'a, str> {
         self.map_borrowed_ref(str::trim)
     }
 }
+
+pub trait IntoCow<'a, T>
+where
+    T: ToOwned + ?Sized,
+{
+    fn into_cow(self) -> Cow<'a, T>;
+}
+
+impl<'a, T: ToOwned<Owned = T>> IntoCow<'a, T> for T {
+    fn into_cow(self) -> Cow<'a, T> {
+        Cow::Owned(self)
+    }
+}
+
+impl<'a, T: ToOwned + ?Sized> IntoCow<'a, T> for &'a T {
+    fn into_cow(self) -> Cow<'a, T> {
+        Cow::Borrowed(self)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+
+    use super::*;
+
+    #[test]
+    fn test_into_cow_owned() {
+        assert_eq!(
+            HashMap::<String, ()>::default().into_cow(),
+            Cow::Owned(HashMap::<String, ()>::default())
+        );
+    }
+
+    #[test]
+    fn test_into_cow_reference() {
+        let hash_map = HashMap::<String, ()>::default();
+        assert_eq!(
+            IntoCow::<HashMap<_, _>>::into_cow(&hash_map),
+            Cow::Borrowed(&HashMap::<String, ()>::default())
+        );
+    }
+
+    #[test]
+    fn test_into_cow_str() {
+        let str = "foo";
+        assert_eq!(IntoCow::<str>::into_cow(str), Cow::Borrowed("foo"));
+    }
+
+    #[test]
+    fn test_into_cow_slice() {
+        let vec = vec!["foo", "bar"];
+        let slice = &*vec;
+        assert_eq!(
+            IntoCow::<[_]>::into_cow(slice),
+            Cow::Borrowed(&*vec!["foo", "bar"])
+        );
+    }
+}
